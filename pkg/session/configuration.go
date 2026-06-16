@@ -124,7 +124,7 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 		conf.SetParameter(guacd.RDPDrivePath, drivePath)
 		conf.SetParameter(guacd.RDPCreateDrivePath, BoolTrue)
 		conf.SetParameter(guacd.RDPEnableDrive, enableDrive)
-		conf.SetParameter(guacd.RDPDriveName, "JumpServer")
+		conf.SetParameter(guacd.RDPDriveName, "Lion")
 		conf.SetParameter(guacd.RDPDisableDownload, disableDownload)
 		conf.SetParameter(guacd.RDPDisableUpload, disableUpload)
 	}
