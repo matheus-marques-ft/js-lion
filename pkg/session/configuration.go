@@ -124,7 +124,7 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 		conf.SetParameter(guacd.RDPDrivePath, drivePath)
 		conf.SetParameter(guacd.RDPCreateDrivePath, BoolTrue)
 		conf.SetParameter(guacd.RDPEnableDrive, enableDrive)
-		conf.SetParameter(guacd.RDPDriveName, "JumpServer")
+		conf.SetParameter(guacd.RDPDriveName, "Lion")
 		conf.SetParameter(guacd.RDPDisableDownload, disableDownload)
 		conf.SetParameter(guacd.RDPDisableUpload, disableUpload)
 	}
@@ -154,7 +154,7 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 	conf.SetParameter(guacd.RDPIgnoreCert, BoolTrue)
 
 	// 设置客户端名称，任务管理器--用户---客户端名称显示
-	conf.SetParameter(guacd.RDPClientName, "JumpServer-Lion")
+	conf.SetParameter(guacd.RDPClientName, "Lion")
 
 	return conf
 }
