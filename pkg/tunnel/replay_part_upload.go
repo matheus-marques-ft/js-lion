@@ -3,6 +3,7 @@ package tunnel
 import (
 	"bufio"
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -272,19 +273,7 @@ func (p *PartUploader) RecordLifecycleLog(event model.LifecycleEvent, logObj mod
 }
 
 func ReadInstruction(r *bufio.Reader) (guacd.Instruction, error) {
-	var ret strings.Builder
-	for {
-		msg, err := r.ReadString(guacd.ByteSemicolonDelimiter)
-		if err != nil && msg == "" {
-			return guacd.Instruction{}, err
-		}
-		ret.WriteString(msg)
-		if retInstruction, err1 := guacd.ParseInstructionString(ret.String()); err1 == nil {
-			return retInstruction, nil
-		} else {
-			logger.Infof("ReadInstruction err:  %v\n", err1.Error())
-		}
-	}
+	return guacd.NewInstructionDecoder(r).ReadInstruction()
 }
 
 func LoadPartMetaByFile(partFile string) (PartMeta, error) {
@@ -316,7 +305,10 @@ func LoadPartReplayTime(partFile string) (startTime int64, endTime int64, err er
 	for {
 		inst, err1 := ReadInstruction(reader)
 		if err1 != nil {
-			break
+			if err1 == io.EOF {
+				break
+			}
+			return startTime, endTime, err1
 		}
 		if inst.Opcode != "sync" {
 			continue
