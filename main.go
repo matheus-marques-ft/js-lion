@@ -266,7 +266,7 @@ func registerRouter(jmsService *service.JMService, tunnelService *tunnel.Guacamo
 	cookieStore := ginCookie.NewStore([]byte(common.RandomStr(32)))
 	lionGroup.Use(middleware.GinSessionAuth(cookieStore))
 	now := time.Now()
-	// vue的设置
+	// vue settings
 	{
 		lionGroup.Static("/assets", "./ui/dist/assets")
 		lionGroup.StaticFile("/favicon.ico", "./ui/dist/favicon.ico")
@@ -301,7 +301,7 @@ func registerRouter(jmsService *service.JMService, tunnelService *tunnel.Guacamo
 		})
 	}
 
-	// token 使用 lion 自带认证
+	// token uses lion's own authentication
 
 	{
 		tokenGroup := lionGroup.Group("/token")
@@ -311,7 +311,7 @@ func registerRouter(jmsService *service.JMService, tunnelService *tunnel.Guacamo
 		tokenTunnels.POST("/:tid/streams/:index/:filename", tunnelService.UploadFile)
 	}
 
-	// ws的设置
+	// ws settings
 	wsGroup := lionGroup.Group("/ws")
 	{
 		wsGroup.Group("/connect").Use(
@@ -487,7 +487,7 @@ func uploadRemainReplay(jmsService *service.JMService, remainFiles map[string]st
 		}
 
 		logger.Infof("Upload remain session replay %s success", absGzPath)
-		// 上传成功删除文件
+		// remove the file after successful upload
 		_ = os.Remove(absGzPath)
 		if _, err = jmsService.FinishReplyWithSize(sid, absGzFileInfo.Size()); err != nil {
 			logger.Errorf("Finish reply to core api failed: %s", err)
@@ -571,7 +571,7 @@ func MustJMService() *service.JMService {
 		service.JMSAccessKey(key.ID, key.Secret),
 	)
 	if err != nil {
-		logger.Fatal("创建JMS Service 失败 " + err.Error())
+		logger.Fatal("Create JMS Service failed " + err.Error())
 		os.Exit(1)
 	}
 	return jmsService
@@ -583,7 +583,7 @@ func MustLoadValidAccessKey() model.AccessKey {
 	if err := key.LoadFromFile(conf.AccessKeyFilePath); err != nil {
 		return MustRegisterTerminalAccount()
 	}
-	// 校验accessKey
+	// validate accessKey
 	return MustValidKey(key)
 }
 
@@ -601,11 +601,11 @@ func MustRegisterTerminalAccount() (key model.AccessKey) {
 		key.ID = terminal.ServiceAccount.AccessKey.ID
 		key.Secret = terminal.ServiceAccount.AccessKey.Secret
 		if err := key.SaveToFile(conf.AccessKeyFilePath); err != nil {
-			logger.Error("保存key失败: " + err.Error())
+			logger.Error("Save key failed: " + err.Error())
 		}
 		return key
 	}
-	logger.Error("注册终端失败退出")
+	logger.Error("Register terminal failed, exiting")
 	os.Exit(1)
 	return
 }
@@ -618,14 +618,14 @@ func MustValidKey(key model.AccessKey) model.AccessKey {
 			case errors.Is(err, service.ErrUnauthorized):
 				return MustRegisterTerminalAccount()
 			default:
-				logger.Error("校验 access key failed: " + err.Error())
+				logger.Error("Validate access key failed: " + err.Error())
 			}
 			time.Sleep(5 * time.Second)
 			continue
 		}
 		return key
 	}
-	logger.Error("校验 access key failed退出")
+	logger.Error("Validate access key failed, exiting")
 	os.Exit(1)
 	return key
 }

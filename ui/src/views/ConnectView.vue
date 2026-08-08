@@ -160,7 +160,7 @@ const processUploadQueue = async () => {
     } finally {
       setTimeout(() => {
         handleRemoveFile(uploadOptions.file);
-      }, 1000 * 5); // 延迟5秒后移除上传文件
+      }, 1000 * 5); // Remove upload file after a 5-second delay
     }
   }
   isUploading.value = false;
@@ -289,7 +289,7 @@ const getKeyboardLayout = () => {
       return keyboardLayout;
     }
   }
-  return 'en-us-qwerty'; // 默认键盘布局
+  return 'en-us-qwerty'; // Default keyboard layout
 };
 
 const keyboardLayout = ref<string>(getKeyboardLayout());
@@ -359,9 +359,9 @@ const scaleGuaDisplay = (value: number) => {
     return;
   }
   console.log('Scaling Guacamole display to:', value);
-  const newScale = value / 100; // 限制缩放范围在0.1到5之间
+  const newScale = value / 100; // Limit the scale range to between 0.1 and 5
 
-  // 只要是加号放大就显示滚动条
+  // Show the scrollbar whenever zooming in (plus)
   if (newScale > scale.value) {
     shouldEnableScroll.value = true;
   } else if (newScale <= 1) {
@@ -402,7 +402,7 @@ const isRemoteApp = computed(() => {
   return true;
 });
 
-// 滚动条控制
+// Scrollbar control
 const shouldEnableScroll = ref(false);
 </script>
 

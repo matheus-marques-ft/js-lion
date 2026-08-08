@@ -102,7 +102,7 @@ func (s TunnelSession) configurationRemoteAppRDP() guacd.Configuration {
 	}
 	conf := rdpConf.GetGuacdConfiguration()
 	remoteAPP := appletOpt.RemoteAppOption
-	// 设置 remote app 参数
+	// set remote app parameters
 	{
 		conf.SetParameter(guacd.RDPRemoteApp, remoteAPP.Name)
 		conf.SetParameter(guacd.RDPRemoteAppDir, "")

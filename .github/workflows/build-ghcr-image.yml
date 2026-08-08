@@ -1,6 +1,9 @@
 name: build image and push to ghcr.io
 
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       BRANCH:
@@ -43,19 +46,32 @@ jobs:
 
       - name: Extract repository name
         id: repo
-        run: echo "REPO=$(basename ${{ github.repository }})" >> $GITHUB_ENV
+        run: echo "REPO=$(basename ${{ github.repository }} | sed 's/^js-//')" >> $GITHUB_ENV
 
       - name: Extract image prefix
         run: |
           echo "IMAGE_PREFIX=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
+      - name: Resolve build inputs
+        id: resolve
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "platforms=linux/amd64,linux/arm64" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ inputs.IMAGE_TAG }}" >> "$GITHUB_OUTPUT"
+            echo "version=${{ inputs.VERSION }}" >> "$GITHUB_OUTPUT"
+            echo "platforms=${{ inputs.PLATFORMS }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build and push multi-arch image
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms:  ${{ inputs.PLATFORMS }}
+          platforms: ${{ steps.resolve.outputs.platforms }}
           push: true
-          build-args: VERSION=${{ inputs.VERSION }}
+          build-args: VERSION=${{ steps.resolve.outputs.version }}
           file: Dockerfile
-          tags: ${{ env.IMAGE_PREFIX }}/${{ env.REPO }}:${{ inputs.IMAGE_TAG }}
+          tags: ${{ env.IMAGE_PREFIX }}/${{ env.REPO }}:${{ steps.resolve.outputs.tag }}
 

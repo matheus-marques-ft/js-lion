@@ -83,7 +83,7 @@ func (filter *InputStreamInterceptingFilter) addInputStream(stream *InputStreamR
 	filter.readNextBlob(stream)
 }
 
-// 上传文件的对象
+// object for uploading a file
 type InputStreamResource struct {
 	streamIndex string
 	//mediaType   string // application/octet-stream

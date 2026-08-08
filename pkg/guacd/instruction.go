@@ -20,7 +20,7 @@ func NewInstruction(opcode string, args ...string) (ret Instruction) {
 	return ret
 }
 
-// 构造 `OPCODE,ARG1,ARG2,ARG3,...;` 的格式
+// build the `OPCODE,ARG1,ARG2,ARG3,...;` format
 func (opt *Instruction) String() string {
 	if len(opt.ProtocolForm) > 0 {
 		return opt.ProtocolForm
@@ -55,7 +55,7 @@ var (
 	ErrInstructionTrailingData    = errors.New("data follows complete instruction")
 )
 
-// raw 是以 `;` 为结束符的原生字符串
+// raw is the native string terminated by `;`
 func ParseInstructionString(raw string) (ret Instruction, err error) {
 	if !strings.HasSuffix(raw, semicolonDelimiter) {
 		return Instruction{}, fmt.Errorf("%w: %s", ErrInstructionMissSemicolon, raw)

@@ -74,7 +74,7 @@ const searchUsers = useDebounceFn(async (value: string, isLoadMore: boolean = fa
     return;
   }
 
-  // 如果是新搜索，重置状态
+  // If it's a new search, reset the state
   if (!isLoadMore || value !== currentQuery.value) {
     currentQuery.value = value;
     currentPage.value = 1;
@@ -85,22 +85,22 @@ const searchUsers = useDebounceFn(async (value: string, isLoadMore: boolean = fa
   searchLoading.value = true;
 
   try {
-    // 修改API调用以支持分页参数
+    // Modify the API call to support pagination parameters
     const params = new URLSearchParams({
       search: currentQuery.value,
       page: currentPage.value.toString(),
-      limit: '10', // 每页加载10条数据
+      limit: '10', // Load 10 items per page
     });
 
     const response = await fetch(withBaseUrl(`/api/v1/users/users/suggestions/?${params}`)).then(
       (res: any) => res.json(),
     );
 
-    // 假设分页响应格式为：{ results: [...], count: number, next: string|null }
-    const newUsers = response.results || response; // 兼容非分页格式
+    // Assume the paginated response format is: { results: [...], count: number, next: string|null }
+    const newUsers = response.results || response; // Support the non-paginated format as well
 
     if (isLoadMore && currentPage.value > 1) {
-      // 加载更多时追加数据
+      // Append data when loading more
       const filteredUsers = newUsers.filter((user: UserInfo) => {
         const query = currentQuery.value.toLowerCase();
         const caseInsensitiveMatch = (name: any, query: string) =>
@@ -109,7 +109,7 @@ const searchUsers = useDebounceFn(async (value: string, isLoadMore: boolean = fa
       });
       userOptions.value = [...userOptions.value, ...filteredUsers];
     } else {
-      // 新搜索时替换数据
+      // Replace data on a new search
       userOptions.value = newUsers.filter((user: UserInfo) => {
         const query = currentQuery.value.toLowerCase();
         const caseInsensitiveMatch = (name: any, query: string) =>
@@ -118,7 +118,7 @@ const searchUsers = useDebounceFn(async (value: string, isLoadMore: boolean = fa
       });
     }
 
-    // 检查是否还有更多数据
+    // Check whether there is more data
     hasMore.value = response.next !== null && response.next !== undefined;
   } catch (error) {
     console.error('Search users error:', error);
@@ -152,7 +152,7 @@ const mappedUserOptions = computed(() => {
   }
 });
 
-// 装饰器模式：创建单选处理器
+// Decorator pattern: create a single-select handler
 const createSingleSelectHandler = <T, K extends keyof T>(
   options: T[],
   valueKey: K,
@@ -164,7 +164,7 @@ const createSingleSelectHandler = <T, K extends keyof T>(
       (item as any)[checkedKey] = item[valueKey] === selectedValue;
     });
 
-    // 执行回调函数，更新 shareLinkRequest
+    // Execute the callback function to update shareLinkRequest
     if (onSelect) {
       onSelect(selectedValue);
     }
@@ -215,7 +215,7 @@ const renderTag: SelectRenderTag = ({ option, handleClose }) => {
 const scrollSearch = (e: Event) => {
   const currentTarget = e.currentTarget as HTMLElement;
   if (currentTarget.scrollTop + currentTarget.clientHeight >= currentTarget.scrollHeight - 10) {
-    // 到达底部，加载更多数据
+    // Reached the bottom, load more data
     if (!searchLoading.value && hasMore.value && currentQuery.value) {
       currentPage.value += 1;
       searchUsers(currentQuery.value, true);
@@ -242,7 +242,7 @@ const handleChangeActionPerm = createSingleSelectHandler(
 );
 
 /**
- * @description 创建会话分享链接
+ * @description Create a session share link
  */
 const handleCreateLink = () => {
   if (!shareInfo.value.sessionId) {
@@ -282,7 +282,7 @@ const generateShareURL = (shareId: string, shareCode: string) => {
 };
 
 /**
- * @description 复制会话分享链接
+ * @description Copy the session share link
  */
 const handleCopyShareURL = () => {
   const url = shareInfo.value.shareURL;
@@ -303,7 +303,7 @@ const handleCopyShareURL = () => {
 };
 
 /**
- * @description 返回到上一层
+ * @description Go back to the previous level
  */
 const handleBack = () => {
   resetShareState();

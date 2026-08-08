@@ -85,7 +85,7 @@ const handleRemoveUser = () => {
             {{ primary ? t('PrimaryUser') : t('ShareUser') }}
           </NTag>
         </n-flex>
-        <!-- <n-text depth="3" :style="{ fontSize: '12px' }"> 最后在线：3分钟前 </n-text> -->
+        <!-- <n-text depth="3" :style="{ fontSize: '12px' }"> Last online: 3 minutes ago </n-text> -->
       </n-flex>
     </n-flex>
 

@@ -1,4 +1,0 @@
-ARG VERSION=dev
-
-FROM jumpserver/lion:${VERSION}-ce
-ARG TARGETARCH

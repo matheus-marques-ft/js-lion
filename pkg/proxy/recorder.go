@@ -146,7 +146,7 @@ func (r *FTPFileRecorder) UploadFile(maxRetry int, ftpLogId string) {
 			break
 		}
 		logger.Errorf("Upload FTP file err: %s", err)
-		// 如果还是失败，上传 server 再传一次
+		// if it still fails, upload via server and retry once more
 		if i == maxRetry {
 			if r.storage.TypeName() == "server" {
 				break

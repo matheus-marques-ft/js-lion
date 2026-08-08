@@ -20,7 +20,7 @@ const keyboardLayouts: any = {
   'nl-nl-qwerty': nlnlqwertz,
   'ru-ru-qwerty': ruruqwertz,
 };
-// 拖动相关的状态
+// Drag-related state
 const isDragging = ref(false);
 const dragStartX = ref(0);
 const dragStartY = ref(0);
@@ -30,7 +30,7 @@ const props = defineProps<{
   keyboard?: string;
 }>();
 
-// 拖动事件处理
+// Drag event handling
 const handleMouseDown = (e: MouseEvent) => {
   isDragging.value = true;
   dragStartX.value = e.clientX - keyboardPosition.value.x;
@@ -46,7 +46,7 @@ const handleMouseMove = (e: MouseEvent) => {
   keyboardPosition.value.x = e.clientX - dragStartX.value;
   keyboardPosition.value.y = e.clientY - dragStartY.value;
 
-  // 限制拖动范围，确保不会拖到屏幕外
+  // Limit drag range to keep it from being dragged off-screen
   keyboardPosition.value.x = Math.max(
     0,
     Math.min(window.innerWidth - 400, keyboardPosition.value.x),
@@ -70,9 +70,9 @@ import { useWindowSize } from '@vueuse/core';
 const { width } = useWindowSize();
 const screenKeyboard = ref<Guacamole.OnScreenKeyboard | null>(null);
 
-// 监听窗口大小变化
+// Watch for window size changes
 watch(width, (newWidth) => {
-  screenKeyboard.value?.resize(newWidth / 2); // 调整键盘大小
+  screenKeyboard.value?.resize(newWidth / 2); // Adjust keyboard size
 });
 
 watch(
@@ -85,8 +85,8 @@ watch(
 
 onMounted(() => {
   keyboardPosition.value = {
-    x: 0, // 初始位置居中
-    y: window.innerHeight - 300, // 初始位置在底部
+    x: 0, // Initial position centered
+    y: window.innerHeight - 300, // Initial position at the bottom
   };
   setLayout(keyboardLayout);
 });
@@ -101,7 +101,7 @@ const setLayout = (layoutName: string) => {
   const keyboard = new Guacamole.OnScreenKeyboard(layout);
 
   keyboardRef.prepend(keyboard.getElement());
-  keyboard.resize(window.innerWidth / 2); // 设置键盘大小
+  keyboard.resize(window.innerWidth / 2); // Set keyboard size
   screenKeyboard.value = keyboard;
   keyboard.onkeydown = (key: string) => {
     emit('keyboardChange', 'keydown', key);
@@ -111,7 +111,7 @@ const setLayout = (layoutName: string) => {
   };
 };
 
-// 触摸事件
+// Touch events
 const handleTouchStart = (e: TouchEvent) => {
   if (e.touches.length !== 1) return;
   isDragging.value = true;
@@ -126,7 +126,7 @@ const handleTouchMove = (e: TouchEvent) => {
   keyboardPosition.value.x = touch.clientX - dragStartX.value;
   keyboardPosition.value.y = touch.clientY - dragStartY.value;
 
-  // 限制拖动范围，确保不会拖到屏幕外
+  // Limit drag range to keep it from being dragged off-screen
   keyboardPosition.value.x = Math.max(
     0,
     Math.min(window.innerWidth - 400, keyboardPosition.value.x),
@@ -155,7 +155,7 @@ const handleTouchEnd = () => {
     @touchmove="handleTouchMove"
     @touchend="handleTouchEnd"
   >
-    <!-- 拖动手柄 -->
+    <!-- Drag handle -->
     <div class="drag-handle">
       <span>⋮⋮</span>
     </div>

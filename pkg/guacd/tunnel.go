@@ -24,10 +24,10 @@ func NewTunnel(address string, config Configuration, info ClientInformation) (tu
 		return nil, err
 	}
 	defer func() {
-		// 如果err 则直接关闭 连接
+		// if err, close the connection right away
 		if err != nil {
 			_ = conn.Close()
-			log.Printf("关闭连接防止conn未关闭,%s\n", err.Error())
+			log.Printf("Close connection to prevent unclosed conn, %s\n", err.Error())
 		}
 	}()
 	tunnel = &Tunnel{}

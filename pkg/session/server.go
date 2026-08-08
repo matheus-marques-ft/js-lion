@@ -121,9 +121,9 @@ func (s *Server) CreatByToken(ctx *gin.Context, token string) (TunnelSession, er
 		opts = append(opts, WithAppletOption(appletOpt))
 		logger.Infof("Connect applet(%s) use host(%s) account (%s)", connectToken.Asset.String(),
 			appletOpt.Host.String(), appletOpt.Account.String())
-		// 连接发布机，需要使用发布机的网关
+		// connecting to the publishing machine, need to use its gateway
 		opts = append(opts, WithGateway(appletOptions.Gateway))
-		// 替换成 发布机的 platform 信息
+		// replace with the publishing machine's platform info
 		opts = append(opts, WithPlatform(appletOptions.Platform))
 	case connectVirtualAPP:
 		virtualApp, err1 := s.JmsService.GetConnectTokenVirtualAppOption(token)
@@ -151,7 +151,7 @@ func (s *Server) CreatByToken(ctx *gin.Context, token string) (TunnelSession, er
 		opts = append(opts, WithVirtualAppOption(&virtualContainer))
 		logger.Infof("Connect applet(%s) use virtual app %s", connectToken.Asset.String(),
 			virtualContainer.String())
-		// 连接虚拟应用，不需要使用虚拟应用的网关
+		// connecting to the virtual app, no need to use the virtual app's gateway
 		opts = append(opts, WithGateway(nil))
 
 	default:

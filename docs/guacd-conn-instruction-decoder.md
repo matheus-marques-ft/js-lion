@@ -1,91 +1,111 @@
-# Guacd 指令解码器
+# Guacd Instruction Decoder
 
-## 协议格式
+## Protocol Format
 
-Guacamole 指令由一个 opcode 和零个或多个参数组成。每个元素均使用
-`LENGTH.VALUE` 格式，元素之间以逗号分隔，整条指令以分号结束。
+A Guacamole instruction consists of an opcode and zero or more arguments. Each
+element uses the `LENGTH.VALUE` format, elements are separated by commas, and
+the whole instruction ends with a semicolon.
 
-`LENGTH` 表示 `VALUE` 的 Unicode 码点数，不是 UTF-8 字节数。逗号和分号可以
-出现在元素内容中，只有读取完声明数量的码点后，后续逗号或分号才作为结构分隔符。
+`LENGTH` denotes the number of Unicode code points in `VALUE`, not the number
+of UTF-8 bytes. Commas and semicolons may appear inside element content —
+only after the declared number of code points has been read does a following
+comma or semicolon act as a structural delimiter.
 
 ## InstructionDecoder
 
-`InstructionDecoder` 从 `io.Reader` 增量读取指令。`ReadInstruction()` 每次只返回
-一条完整的 `Instruction`，并保留缓冲区中属于下一条指令的数据。
+`InstructionDecoder` reads instructions incrementally from an `io.Reader`.
+Each call to `ReadInstruction()` returns exactly one complete `Instruction`,
+and retains in the buffer whatever data belongs to the next instruction.
 
-创建解码器时：
+When creating a decoder:
 
-- 输入已经是 `*bufio.Reader` 时直接复用；
-- 其他 `io.Reader` 会由新的 `bufio.Reader` 包装；
-- 对非缓冲 reader，应持续复用同一个解码器，避免丢失预读数据；
-- 解码器不用于并发读取。
+- If the input is already a `*bufio.Reader`, it is reused directly;
+- Any other `io.Reader` is wrapped in a new `bufio.Reader`;
+- For an unbuffered reader, the same decoder should be reused continuously,
+  to avoid losing any pre-read data;
+- The decoder is not intended for concurrent reads.
 
-单条指令的读取过程如下：
+The process for reading a single instruction is as follows:
 
-1. 读取非空的 ASCII 十进制长度前缀；
-2. 按声明长度读取 UTF-8 编码的 Unicode 码点；
-3. 验证元素后的字符为逗号或分号；
-4. 遇到逗号时继续读取下一个元素，遇到分号时返回指令。
+1. Read a non-empty ASCII decimal length prefix;
+2. Read the declared number of UTF-8-encoded Unicode code points;
+3. Verify that the character following the element is a comma or semicolon;
+4. On a comma, continue reading the next element; on a semicolon, return the
+   instruction.
 
-## 解析限制
+## Parsing Limits
 
-解码器使用以下固定限制：
+The decoder enforces the following fixed limits:
 
-| 限制 | 值 |
+| Limit | Value |
 | --- | ---: |
-| 单个元素最大 Unicode 码点数 | 8192 |
-| 长度前缀最大位数 | 5 |
-| 单条指令最大元素数（包含 opcode） | 128 |
-| 单条指令最大累计字节数 | 32768 |
+| Max Unicode code points per element | 8192 |
+| Max digits in the length prefix | 5 |
+| Max elements per instruction (including the opcode) | 128 |
+| Max cumulative bytes per instruction | 32768 |
 
-累计字节数包含长度前缀、元素内容和分隔符。超过任一限制都会立即终止当前指令的
-解析。
+The cumulative byte count includes the length prefix, element content, and
+delimiters. Exceeding any of these limits immediately aborts parsing of the
+current instruction.
 
-## 错误语义
+## Error Semantics
 
-解析错误通过包内定义的错误值分类：
+Parsing errors are classified via error values defined within the package:
 
-| 错误 | 含义 |
+| Error | Meaning |
 | --- | --- |
-| `ErrInstructionMissSemicolon` | 字符串解析输入未以分号结束 |
-| `ErrInstructionMissDot` | 长度前缀后缺少点号 |
-| `ErrInstructionBadDigit` | 长度为空或包含非数字字符 |
-| `ErrInstructionBadContent` | 元素内容不完整 |
-| `ErrInstructionBadTerminator` | 元素后的字符不是逗号或分号 |
-| `ErrInstructionTooLong` | 长度前缀、元素长度或累计字节数超限 |
-| `ErrInstructionTooManyElements` | 指令元素数量超限 |
-| `ErrInstructionInvalidUTF8` | 元素包含无效 UTF-8 |
-| `ErrInstructionTrailingData` | 单指令字符串后仍有其他数据 |
+| `ErrInstructionMissSemicolon` | The string being parsed did not end with a semicolon |
+| `ErrInstructionMissDot` | Missing dot after the length prefix |
+| `ErrInstructionBadDigit` | Length is empty or contains non-digit characters |
+| `ErrInstructionBadContent` | Element content is incomplete |
+| `ErrInstructionBadTerminator` | The character following an element is neither a comma nor a semicolon |
+| `ErrInstructionTooLong` | The length prefix, element length, or cumulative byte count exceeds the limit |
+| `ErrInstructionTooManyElements` | The instruction has too many elements |
+| `ErrInstructionInvalidUTF8` | An element contains invalid UTF-8 |
+| `ErrInstructionTrailingData` | Data remains after a single-instruction string |
 
-新指令尚未读取任何字节时遇到流结束，返回 `io.EOF`。长度、内容或终止符读取到
-一半时遇到 EOF，返回的错误可通过 `errors.Is(err, io.ErrUnexpectedEOF)` 判断，
-同时保留对应的解析错误分类。网络超时等非 EOF 的底层读取错误原样返回。
+If the stream ends before any bytes of a new instruction have been read,
+`io.EOF` is returned. If EOF occurs partway through reading the length,
+content, or terminator, the returned error can be identified via
+`errors.Is(err, io.ErrUnexpectedEOF)`, while still retaining the
+corresponding parse-error classification. Non-EOF underlying read errors,
+such as network timeouts, are returned as-is.
 
-解析错误发生时，当前指令已经消费的输入不会回退，调用方应结束当前流或连接。
+When a parse error occurs, the input already consumed for the current
+instruction is not rewound — the caller should terminate the current stream
+or connection.
 
-## 字符串解析与序列化
+## String Parsing and Serialization
 
-`ParseInstructionString()` 使用 `InstructionDecoder` 解析输入，并要求输入严格包含
-一条完整指令：
+`ParseInstructionString()` uses `InstructionDecoder` to parse the input, and
+requires the input to contain exactly one complete instruction:
 
-- 输入必须以分号结束；
-- 第一条指令之后必须立即到达 EOF；
-- 多条指令或任何尾随内容均返回 `ErrInstructionTrailingData`。
+- The input must end with a semicolon;
+- EOF must be reached immediately after the first instruction;
+- Multiple instructions, or any trailing content, result in
+  `ErrInstructionTrailingData`.
 
-`Instruction.String()` 对 opcode 和所有参数统一按 Unicode 码点数生成长度前缀。
-生成结果缓存在 `ProtocolForm` 中，后续调用直接返回缓存内容。
+`Instruction.String()` generates length prefixes for the opcode and all
+arguments uniformly, based on the Unicode code point count. The generated
+result is cached in `ProtocolForm`, and subsequent calls return the cached
+content directly.
 
-## Tunnel 集成
+## Tunnel Integration
 
-`Tunnel` 在建立连接时基于其 `bufio.Reader` 创建一个解码器，并在连接生命周期内
-持续复用。`Tunnel.ReadInstruction()` 在每条指令开始读取前设置一次 15 秒读取
-截止时间，然后由解码器读取并返回一条指令。
+`Tunnel` creates a decoder based on its `bufio.Reader` when the connection is
+established, and reuses it for the lifetime of the connection.
+`Tunnel.ReadInstruction()` sets a 15-second read deadline once before each
+instruction begins reading, after which the decoder reads and returns one
+instruction.
 
-`Tunnel.Read()` 复用 `ReadInstruction()`，并将解析后的指令重新序列化为字节。
-握手阶段的 `expect()` 同样通过该读取路径校验期望的 opcode。
+`Tunnel.Read()` reuses `ReadInstruction()` and re-serializes the parsed
+instruction back into bytes. The `expect()` call during the handshake phase
+also validates the expected opcode through this same read path.
 
-## 回放文件集成
+## Replay File Integration
 
-回放文件读取函数接收现有的 `*bufio.Reader`，并通过 `InstructionDecoder` 逐条读取
-指令。由于解码器直接复用该 reader，多次调用不会丢失 reader 中已缓冲的后续数据。
-回放时间扫描据此遍历指令并提取 `sync` 时间。
+The replay file reading function accepts an existing `*bufio.Reader` and
+reads instructions one at a time via `InstructionDecoder`. Since the decoder
+reuses that reader directly, repeated calls do not lose subsequent data
+already buffered in the reader. Replay time scanning traverses instructions
+on this basis and extracts `sync` timestamps.

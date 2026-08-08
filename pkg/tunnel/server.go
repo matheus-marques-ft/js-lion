@@ -80,7 +80,7 @@ func domainsAllowOrigin(originHost, domains string) bool {
 
 func checkOrigin(r *http.Request) bool {
 	origin := r.Header.Get("Origin")
-	// 允许非浏览器，客户端访问
+	// allow access from non-browser clients
 	if len(origin) == 0 {
 		return true
 	}

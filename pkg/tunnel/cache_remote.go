@@ -178,8 +178,8 @@ func (r *GuaTunnelRedisCache) GetMonitorTunnelerBySessionId(sid string) Tunneler
 
 func (r *GuaTunnelRedisCache) requestRemoteTunnelerBySessionId(sid string) Tunneler {
 	/*
-		1. 发布请求
-		2. 收到Tunneler结果
+		1. publish the request
+		2. receive the Tunneler result
 	*/
 	req := r.createEventRequest(sid, channelEventJoin)
 	res, err := r.sendRequest(&req)
@@ -231,7 +231,7 @@ func (r *GuaTunnelRedisCache) createResultRequest(reqId, roomId, event string) s
 }
 
 /*
-(确保每次都是唯一的)
+(ensures it is unique every time)
 prefix: sessionsChannelPrefix:uuid:reqId:sessionId
 
 */
@@ -307,7 +307,7 @@ func (r *GuaTunnelRedisCache) run() {
 					logger.Infof("Redis cache ignore self request %s", req.ReqId)
 					continue
 				}
-				// 创建result channel的req
+				// create the req for the result channel
 				switch req.Event {
 				case channelEventJoin:
 					successReq := r.createResultRequest(req.ReqId, req.SessionId,
@@ -372,7 +372,7 @@ func (r *GuaTunnelRedisCache) run() {
 					continue
 				}
 				logger.Infof("Redis cache request %s receive result event %s", req.ReqId, req.Event)
-				// 请求结束，移除缓存, 返回请求的结果
+				// request finished, remove from cache and return the request result
 				delete(requestsMap, req.ReqId)
 				switch req.Event {
 				case channelEventJoinSuccess:

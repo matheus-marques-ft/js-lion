@@ -56,7 +56,7 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 
 const shareId = route.params.id as string;
-// 从 route 中获取 id
+// Get the id from the route
 const recordObj = ref<Record<string, any>>({});
 
 const errMessage = ref<string>('');
@@ -190,7 +190,7 @@ onMounted(() => {
   <n-drawer v-model:show="drawShow" :min-width="502" :default-width="502" resizable>
     <n-drawer-content>
       <n-tabs default-value="settings" justify-content="space-evenly" type="line">
-        <n-tab-pane name="share-collaboration" tab="分享会话" v-if="sessionObject">
+        <n-tab-pane name="share-collaboration" tab="Session Share" v-if="sessionObject">
           <SessionShare :session="sessionObject.id" :users="onlineUsers" :disable-create="true" />
         </n-tab-pane>
       </n-tabs>

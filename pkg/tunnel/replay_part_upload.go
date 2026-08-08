@@ -25,7 +25,7 @@ import (
 )
 
 /*
-	原始录像的 part 数据格式
+	Raw replay part data format
 
 data/sessions/e32248ce-2dc8-43c8-b37e-a61d5ee32176
 ├── e32248ce-2dc8-43c8-b37e-a61d5ee32176.0.part
@@ -80,7 +80,7 @@ func (p *PartUploader) preCheckSessionMeta() error {
 		return err1
 	}
 	if p.replayMeta.DateStart == p.replayMeta.DateEnd {
-		// 未结束的录像, 计算结束时间，并上传到 core api 作为会话结束时间
+		// unfinished replay: compute the end time and upload it to the core api as the session end time
 		endTime := GetMaxModTime(p.partFiles)
 		p.replayMeta.DateEnd = common.NewUTCTime(endTime)
 		// api finish time
@@ -117,10 +117,10 @@ func GetMaxModTime(parts []os.DirEntry) time.Time {
 
 func (p *PartUploader) Start() {
 	/*
-		1、创建 upload 目录
-		2、将所有的 part 文件压缩成gz文件，并移动到 upload 目录
-		3、生成新的 meta 文件
-		4、上传
+		1. create the upload directory
+		2. compress all part files into gz files and move them to the upload directory
+		3. generate a new meta file
+		4. upload
 	*/
 	if err := p.CollectionPartFiles(); err != nil {
 		logger.Errorf("PartUploader %s collect part files error: %v, manual handling required", p.SessionId, err)
@@ -140,7 +140,7 @@ func (p *PartUploader) Start() {
 	}
 	p.replayMeta.PartMetas = partMetas
 
-	// 1、创建 upload 目录
+	// 1. create the upload directory
 	uploadPath := filepath.Join(p.RootPath, "upload")
 	if err = os.RemoveAll(uploadPath); err != nil {
 		logger.Errorf("PartUploader %s clean upload dir error: %v", p.SessionId, err)
@@ -150,7 +150,7 @@ func (p *PartUploader) Start() {
 		logger.Errorf("PartUploader %s create upload dir error: %v", p.SessionId, err)
 		return
 	}
-	// 2、将所有的 part 文件压缩移动到 upload 目录
+	// 2. compress all part files and move them to the upload directory
 	for i := range p.partFiles {
 		partFile := p.partFiles[i]
 		partFilePath := filepath.Join(p.RootPath, partFile.Name())
@@ -162,14 +162,14 @@ func (p *PartUploader) Start() {
 			return
 		}
 	}
-	// 3、生成新的 meta 文件
-	// upload 写入 replayMeta json
+	// 3. generate a new meta file
+	// write replayMeta json into the upload directory
 	replayMetaBuf, _ := json.Marshal(p.replayMeta)
 	if err := os.WriteFile(filepath.Join(uploadPath, p.SessionId+".replay.json"), replayMetaBuf, os.ModePerm); err != nil {
 		logger.Errorf("PartUploader %s write replay meta file error: %v", p.SessionId, err)
 		return
 	}
-	// 4、上传 upload 目录下的所有文件到 存储
+	// 4. upload all files under the upload directory to storage
 	p.uploadToStorage(uploadPath)
 }
 
@@ -282,7 +282,7 @@ func (p *PartUploader) uploadToStorage(uploadPath string) {
 		logger.Errorf("Create replay session task error: %v, try to use self storage", err)
 	}
 
-	// 上传到存储
+	// upload to storage
 	uploadFiles, err := os.ReadDir(uploadPath)
 	if err != nil {
 		logger.Errorf("PartUploader %s read upload dir %s error: %v", p.SessionId, uploadPath, err)

@@ -1,32 +1,32 @@
-# 项目名称, 会用来向Jumpserver注册, 识别而已, 不能重复
+# Project name, used to register with JumpServer purely for identification, must not be duplicated
 # NAME: {{ Hostname }}
 
-# Jumpserver项目的url, api请求注册会使用
+# The JumpServer project's URL, used for API request registration
 CORE_HOST: http://127.0.0.1:8080
 
-# Bootstrap Token, 预共享秘钥, 用来注册使用的service account和terminal
-# 请和jumpserver 配置文件中保持一致，注册完成后可以删除
+# Bootstrap Token, a pre-shared key used to register the service account and terminal
+# Must match the value in JumpServer's config file; can be removed after registration completes
 BOOTSTRAP_TOKEN: <PleasgeChangeSameWithJumpserver>
 
-# 启动时绑定的ip, 默认 0.0.0.0
+# IP to bind to on startup, default 0.0.0.0
 # BIND_HOST: 0.0.0.0
 
-# 监听的HTTP/WS端口号，默认8081
+# HTTP/WS listen port, default 8081
 # HTTPD_PORT: 8081
 
-# 设置日志级别 [DEBUG, INFO, WARN, ERROR, FATAL, CRITICAL]
+# Log level [DEBUG, INFO, WARN, ERROR, FATAL, CRITICAL]
 # LOG_LEVEL: INFO
 
-# Guacamole Server ip， 默认127.0.0.1
+# Guacamole Server IP, default 127.0.0.1
 # GUA_HOST: 127.0.0.1
 
-# Guacamole Server 端口号，默认4822
+# Guacamole Server port, default 4822
 # GUA_PORT: 4822
 
-# 会话共享使用的类型 [local, redis], 默认local
+# Session sharing type [local, redis], default local
 # SHARE_ROOM_TYPE: local
 
-# Redis配置
+# Redis configuration
 # REDIS_HOST: 127.0.0.1
 # REDIS_PORT: 6379
 # REDIS_PASSWORD:

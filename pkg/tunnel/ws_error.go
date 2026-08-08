@@ -38,7 +38,7 @@ func NewJmsEventInstruction(event string, jsonData string) guacd.Instruction {
 	return guacd.NewInstruction(InstructionJmsEvent, event, jsonData)
 }
 
-// todo: 构造一种通用的错误框架，方便前后端处理异常
+// todo: build a generic error framework to make it easier for frontend/backend to handle exceptions
 
 func NewJMSIdleTimeOutError(min int) JMSGuacamoleError {
 	return NewJMSGuacamoleError(1003, strconv.Itoa(min))

@@ -48,7 +48,7 @@ const { t } = useI18n();
 const emit = defineEmits(['open-folder', 'download-file', 'upload-file', 'remove-upload-file']);
 const message = useMessage();
 
-// 添加类型定义
+// Add type definition
 interface RowData {
   name: string;
   is_dir: boolean;
@@ -66,23 +66,23 @@ const props = defineProps<{
 
 const handlePathBack = () => {
   if (!props.folder || !props.folder.parent) return;
-  // 处理路径后退事件
-  storeBackFolders.value.push(props.folder); // 保存当前文件夹到后退存储
+  // Handle path back event
+  storeBackFolders.value.push(props.folder); // Save current folder to the back-navigation store
   emit('open-folder', props.folder.parent);
 };
 
 const handlePathForward = () => {
   if (!storeBackFolders.value || storeBackFolders.value.length === 0) return;
-  // 处理路径前进事件
-  const nextFolder = storeBackFolders.value.pop(); // 获取第一个文件夹
+  // Handle path forward event
+  const nextFolder = storeBackFolders.value.pop(); // Get the first folder
   if (nextFolder) {
     emit('open-folder', nextFolder);
   }
 };
 
 const handlePathClick = (item: any) => {
-  // 处理路径点击事件
-  storeBackFolders.value.length = 0; // 清空后退存储
+  // Handle path click event
+  storeBackFolders.value.length = 0; // Clear the back-navigation store
   emit('open-folder', item.row);
 };
 
@@ -122,13 +122,13 @@ const isShowUploadList = ref(false);
 const uploadFileList = ref([]);
 
 const customRequest = (options: UploadCustomRequestOptions) => {
-  // 自定义上传请求逻辑
+  // Custom upload request logic
   const { onFinish, onError, file } = options;
   emit('upload-file', options, props.folder);
 };
 
 const handleUploadFileChange = useDebounceFn((file: any) => {
-  // 处理上传文件变化事件
+  // Handle upload file change event
   // console.log('Upload file changed:', file);
 }, 100);
 
@@ -143,7 +143,7 @@ const handleShowInner = () => {
   });
 };
 const handleRefresh = () => {
-  // 刷新逻辑
+  // Refresh logic
   emit('open-folder', props.folder);
 };
 const onClickOutside = () => {
@@ -151,7 +151,7 @@ const onClickOutside = () => {
 };
 const dataList = computed(() => {
   return props.files.filter((file: any) => {
-    // 这里可以添加搜索过滤逻辑
+    // Search filtering logic can be added here
     return file.name.toLowerCase().includes(searchValue.value.toLowerCase());
   }) as RowData[];
 });
@@ -239,22 +239,22 @@ const handleSearch = useDebounceFn(() => {
 }, 300);
 
 const disabledBack = computed(() => {
-  // 禁用后退按钮的逻辑
+  // Logic for disabling the back button
   return !props.folder || !props.folder.parent;
 });
 
 const disabledForward = computed(() => {
-  // 禁用前进按钮的逻辑
+  // Logic for disabling the forward button
   return storeBackFolders.value === null || storeBackFolders.value.length === 0;
 });
 
-// 动态设置 dropdown options
+// Dynamically set dropdown options
 const options = computed(() => {
   if (!currentRowData.value) return [];
 
   const baseOptions = [];
 
-  // 下载选项 - 对所有文件和文件夹都显示
+  // Download option - shown for all files and folders
   baseOptions.push({
     key: 'download',
     label: t('Download'),
@@ -296,9 +296,9 @@ const handleSelect = (key: string) => {
   showDropdown.value = false;
   switch (key) {
     case 'download': {
-      // 处理下载逻辑
+      // Handle download logic
       if (currentRowData.value) {
-        // 这里可以添加下载逻辑
+        // Download logic can be added here
         emit('download-file', currentRowData.value);
       }
 
@@ -308,18 +308,18 @@ const handleSelect = (key: string) => {
 };
 
 const handleUploadFinish = (options: any) => {
-  // 处理上传完成事件
+  // Handle upload finish event
 
   message.success(t('UploadSuccess') + ': ' + options.file.name);
 };
 
 const handleUploadError = (options: any) => {
-  // 处理上传错误事件
+  // Handle upload error event
   // message.error(t('UploadError') + ': ' + options.file.name);
 };
 
 const removeUploadList = (options: any) => {
-  // 处理移除上传文件列表
+  // Handle removing an entry from the upload file list
   const { file } = options;
   emit('remove-upload-file', file);
 };

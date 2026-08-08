@@ -1,38 +1,51 @@
-# 录像分片上传修改记录
+# Recording Segment Upload Change Log
 
-## 上传前预检
+## Pre-upload Precheck
 
-上传器在生成压缩文件和开始上传之前，对当前录像的全部原始分片执行预检：
+Before generating the compressed archive and starting the upload, the
+uploader performs a precheck on all of the raw segments belonging to the
+current recording:
 
-- 只收集名称符合 `{session_id}.{index}.part` 的当前会话分片；
-- 按数字分片序号排序；
-- 分片序号必须从 0 开始且连续；
-- 使用同一个 `InstructionDecoder` 完整扫描每个分片；
-- 通过累计读取字节数扣除缓冲区预读字节计算 `sync` 结束位置，不对每个 `sync`
-  调用 `Seek`；
-- 每个分片至少包含一个时间戳有效的 `sync` 指令。
+- Only segments whose names match `{session_id}.{index}.part` for the
+  current session are collected;
+- They are sorted by numeric segment index;
+- Segment indices must start at 0 and be contiguous;
+- Each segment is scanned in full using the same `InstructionDecoder`;
+- The end position of each `sync` is computed by subtracting the buffer's
+  pre-read bytes from the cumulative bytes read, without calling `Seek` for
+  every `sync`;
+- Each segment must contain at least one `sync` instruction with a valid
+  timestamp.
 
-任意分片出现无效指令、无有效 `sync`、无效 `sync` 时间或分片序号不连续时，
-整段录像不会上传，原始文件保留供人工处理。
+If any segment has an invalid instruction, no valid `sync`, an invalid
+`sync` timestamp, or a non-contiguous segment index, the entire recording is
+not uploaded, and the original files are kept for manual handling.
 
-## 最后分片恢复
+## Last-Segment Recovery
 
-自动恢复只适用于最后一个分片，并且必须同时满足以下条件：
+Automatic recovery applies only to the last segment, and requires that all
+of the following conditions hold:
 
-- 解析错误可通过 `errors.Is(err, io.ErrUnexpectedEOF)` 判断；
-- 错误之前至少存在一个完整且时间戳有效的 `sync`。
+- The parse error can be identified via
+  `errors.Is(err, io.ErrUnexpectedEOF)`;
+- At least one complete `sync` with a valid timestamp exists before the
+  error.
 
-满足条件时，将最后一个分片截断到最后一个完整 `sync` 的结束位置，然后重新扫描。
-重新扫描仍有异常时，整段录像不会上传。非最后分片不执行自动截断。
+When these conditions are met, the last segment is truncated to the end
+position of the last complete `sync`, and then rescanned. If the rescan
+still produces an error, the entire recording is not uploaded. Non-final
+segments never undergo automatic truncation.
 
-## 元数据与上传
+## Metadata and Upload
 
-全部分片通过预检后：
+Once all segments have passed the precheck:
 
-1. 根据扫描结果重新生成每个分片的开始时间、结束时间、持续时间和文件大小；
-2. 重写对应的 `.part.meta` 文件；
-3. 清理并重新创建本次上传暂存目录；
-4. 压缩全部分片并生成回放元数据；
-5. 开始上传。
+1. Each segment's start time, end time, duration, and file size are
+   regenerated based on the scan results;
+2. The corresponding `.part.meta` file is rewritten;
+3. The staging directory for this upload is cleared and recreated;
+4. All segments are compressed and the replay metadata is generated;
+5. The upload begins.
 
-校验失败发生在压缩和上传之前，因此不会跳过异常分片继续上传后续分片。
+Validation failure occurs before compression and upload, so no faulty
+segment is skipped in order to continue uploading the remaining segments.

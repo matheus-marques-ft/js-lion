@@ -8,7 +8,7 @@ const emit = defineEmits(['update:text']);
 import { useMessage } from 'naive-ui';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
-// 内部输入值
+// Internal input value
 const inputValue = ref<string>('');
 const isLoading = ref<boolean>(false);
 const message = useMessage();
@@ -44,7 +44,7 @@ const validateTextLimit = (text: string) => {
   return true;
 };
 
-// 手动读取剪贴板内容
+// Manually read clipboard content
 const loadClipboardText = async () => {
   try {
     isLoading.value = true;
@@ -56,13 +56,13 @@ const loadClipboardText = async () => {
     await handleInput(text);
   } catch (error) {
     console.log('Failed to read clipboard text:', error);
-    // 可以添加用户友好的错误提示
+    // A user-friendly error message could be added here
   } finally {
     isLoading.value = false;
   }
 };
 
-// 处理输入事件
+// Handle input event
 const handleInput = useDebounceFn((value: string) => {
   if (!validateTextLimit(value)) {
     return;
@@ -70,14 +70,14 @@ const handleInput = useDebounceFn((value: string) => {
   emit('update:text', value);
 }, 300);
 
-// 处理焦点事件，尝试自动读取剪贴板
+// Handle focus event, try to auto-read the clipboard
 const handleFocus = async () => {
-  // 只有在输入框为空时才自动读取
+  // Only auto-read when the input is empty
   if (!inputValue.value.trim()) {
     try {
       await loadClipboardText();
     } catch (error) {
-      // 静默处理错误，不影响用户体验
+      // Silently handle the error, don't affect user experience
       console.debug('Auto-read clipboard failed, user can click button to read manually');
     }
   }
@@ -151,7 +151,7 @@ const size = {
         type="primary"
         size="small"
       >
-       从剪贴板粘贴
+       Paste from clipboard
       </n-button> -->
 <!-- <n-button
         @click="loadRemoteClipboardText"
@@ -159,7 +159,7 @@ const size = {
         size="small"
         :disabled="props.disabled"
       >
-        显示远程同步的剪贴板信息</n-button
+        Show remote-synced clipboard content</n-button
       > -->
 <!-- </n-space> -->
 <!-- <n-input
@@ -168,7 +168,7 @@ const size = {
       type="textarea"
       :autosize="size"
       readonly
-      placeholder="远程同步的剪贴板内容"
+      placeholder="Remote-synced clipboard content"
       :disabled="props.disabled"
     /> -->
 <!-- </n-space> -->

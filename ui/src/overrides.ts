@@ -4,7 +4,7 @@ import { useColor } from './hooks/useColor';
 
 const { darken, lighten, alpha, setCurrentMainColor } = useColor();
 
-// 创建主题生成函数
+// Create theme generation function
 export const createThemeOverrides = (
   themeType: 'default' | 'deepBlue' | 'darkGary' = 'default',
 ): GlobalThemeOverrides => {
@@ -147,7 +147,7 @@ export const createThemeOverrides = (
       textColorFocusPrimary: textColor,
     },
     Switch: {
-      // switch 与 koko 有不同
+      // switch differs from koko
       railColor: alpha(0.3, '#FFFFFF'),
       railColorActive: alpha(1, '#FFFFFF'),
       buttonColor: backgroundColor,

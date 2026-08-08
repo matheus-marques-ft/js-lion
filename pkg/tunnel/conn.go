@@ -134,7 +134,7 @@ func (t *Connection) readTunnelInstruction() (*guacd.Instruction, error) {
 
 func (t *Connection) Run(ctx *gin.Context) (err error) {
 	defer t.releaseMonitorTunnel()
-	// 需要发送 uuid 返回给 guacamole tunnel
+	// need to send the uuid back to the guacamole tunnel
 	err = t.SendWsMessage(guacd.NewInstruction(
 		INTERNALDATAOPCODE, t.guacdTunnel.UUID()))
 	if err != nil {
@@ -158,9 +158,9 @@ func (t *Connection) Run(ctx *gin.Context) (err error) {
 	defer func() {
 		parser.Close()
 	}()
-	// 处理数据流
+	// process the data stream
 	parser.ParseStream(userInputMessageChan)
-	// 记录命令
+	// record commands
 	cmdChan := parser.CommandRecordChan()
 	go t.recordCommand(cmdChan)
 
@@ -478,7 +478,7 @@ func (t *Connection) unTraceMonitorTunnel(monitorTunnel *guacd.Tunnel) {
 }
 
 func (t *Connection) recordCommand(cmdRecordChan chan *session.ExecutedCommand) {
-	// 命令记录
+	// command recording
 	cmdRecorder := t.Service.GetCommandRecorder(t.Sess)
 	for item := range cmdRecordChan {
 		if item.Command == "" {
@@ -491,11 +491,11 @@ func (t *Connection) recordCommand(cmdRecordChan chan *session.ExecutedCommand) 
 		cmd := t.generateCommandResult(item)
 		cmdRecorder.Record(cmd)
 	}
-	// 关闭命令记录
+	// close command recording
 	cmdRecorder.End()
 }
 
-// generateCommandResult 生成命令结果
+// generateCommandResult builds the command result
 func (t *Connection) generateCommandResult(item *session.ExecutedCommand) *model.Command {
 	var (
 		input  string

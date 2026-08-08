@@ -155,7 +155,7 @@ func (filter *OutputStreamInterceptingFilter) addOutStream(out OutStreamResource
 	filter.streams[out.streamIndex] = out
 }
 
-// 下载文件的对象
+// object for downloading a file
 
 type OutStreamResource struct {
 	streamIndex string

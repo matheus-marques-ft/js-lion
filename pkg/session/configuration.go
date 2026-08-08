@@ -56,8 +56,8 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 	conf.SetParameter(guacd.Port, port)
 
 	/*
-		 pam 会处理 ad Domain 的信息，转化成 username@domain 的格式
-		 不在从 platform 处理
+		 pam will handle the ad Domain info and convert it into the username@domain format
+		 no longer processed from platform
 			if r.Platform != nil {
 				if rdpSetting, ok := r.Platform.GetProtocolSetting(rdp); ok {
 					if rdpSetting.Setting.AdDomain != "" {
@@ -67,9 +67,9 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 			}
 
 			/*
-				AD Domain 的处理调整为
-				1、如果账号 username 格式是 domain\username 则需要转换为 username@domain，且覆盖平台的 AD 域设置。
-				2、其他格式的账号，如果平台中设置了 AD 域则使用平台中的设置，否则使用不设置
+				AD Domain handling adjusted to:
+				1. if the account username is in domain\username format, convert it to username@domain, overriding the platform's AD domain setting.
+				2. for other account formats, use the platform's AD domain setting if configured, otherwise leave it unset
 	*/
 
 	parts := strings.Split(username, `\`)
@@ -78,15 +78,15 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 		adDomain = parts[0]
 	}
 
-	// 试图从 username@domain 格式的 username 中获取 AD 域的信息
+	// try to get the AD domain info from a username in the username@domain format
 	//if adDomain == "" && strings.Contains(username, `@`) {
 	//	adParts := strings.Split(username, `@`)
 	//	if len(adParts) >= 2 {
 	//		adDomain = adParts[len(adParts)-1]
 	//	}
 	//}
-	// domain 和 用户名 同时设置 AD 域的信息，freerdp 会连接失败
-	// domain 和 用户名 无法同时添加 AD 域 的信息
+	// if domain and username both set the AD domain info at the same time, freerdp connection will fail
+	// domain and username cannot both carry the AD domain info at the same time
 
 	conf.SetParameter(guacd.RDPUsername, username)
 	conf.SetParameter(guacd.RDPPassword, password)
@@ -94,7 +94,7 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 		conf.SetParameter(guacd.RDPDomain, adDomain)
 	}
 
-	//// 设置 录像路径
+	//// set the recording path
 	//if r.TerminalConfig.ReplayStorage.TypeName != "null" {
 	//	recordDirPath := filepath.Join(config.GlobalConfig.RecordPath,
 	//		r.Created.Format(recordDirTimeFormat))
@@ -103,7 +103,7 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 	//	conf.SetParameter(guacd.RecordingName, r.SessionId)
 	//}
 
-	// display 相关
+	// display related
 	{
 		for key, value := range RDPDisplay.GetDisplayParams() {
 			conf.SetParameter(key, value)
@@ -111,11 +111,11 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 		for key, value := range RDPBuiltIn {
 			conf.SetParameter(key, value)
 		}
-		// reconnect 会造成创建多个录像文件
+		// reconnect would cause multiple recording files to be created
 		conf.SetParameter(guacd.RDPResizeMethod, "display-update")
 	}
 
-	// 设置 挂载目录 上传下载
+	// set the mounted directory for upload/download
 	{
 		driverShareId := r.User.ID
 		if config.GlobalConfig.DriveScope == config.DriverScopeSession {
@@ -133,7 +133,7 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 		conf.SetParameter(guacd.RDPDisableUpload, disableUpload)
 	}
 
-	// 粘贴复制
+	// copy/paste
 	{
 		disableCopy := ConvertBoolToString(!r.ActionsPerm.EnableCopy)
 		disablePaste := ConvertBoolToString(!r.ActionsPerm.EnablePaste)
@@ -141,7 +141,7 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 		conf.SetParameter(guacd.DisablePaste, disablePaste)
 	}
 
-	// 平台中的设置
+	// setting from the platform
 	rdpSecurityValue := SecurityAny
 	if r.Platform != nil {
 		if rdpSettings, ok := r.Platform.GetProtocolSetting(rdp); ok {
@@ -157,7 +157,7 @@ func (r RDPConfiguration) GetGuacdConfiguration() guacd.Configuration {
 	conf.SetParameter(guacd.RDPSecurity, rdpSecurityValue)
 	conf.SetParameter(guacd.RDPIgnoreCert, BoolTrue)
 
-	// 设置客户端名称，任务管理器--用户---客户端名称显示
+	// set the client name, shown in Task Manager under Users -- Client Name
 	conf.SetParameter(guacd.RDPClientName, "Lion")
 
 	return conf
@@ -202,7 +202,7 @@ func (r VNCConfiguration) GetGuacdConfiguration() guacd.Configuration {
 		conf.SetParameter(guacd.VNCPassword, password)
 		conf.SetParameter(guacd.VNCAutoretry, "3")
 	}
-	// 设置存储
+	// set storage
 	//replayCfg := r.TerminalConfig.ReplayStorage
 	//if replayCfg.TypeName != "null" {
 	//	recordDirPath := filepath.Join(config.GlobalConfig.RecordPath, r.Created.Format(recordDirTimeFormat))
@@ -216,7 +216,7 @@ func (r VNCConfiguration) GetGuacdConfiguration() guacd.Configuration {
 		}
 	}
 
-	// 粘贴复制
+	// copy/paste
 	{
 		disableCopy := ConvertBoolToString(!r.ActionsPerm.EnableCopy)
 		disablePaste := ConvertBoolToString(!r.ActionsPerm.EnablePaste)
@@ -275,7 +275,7 @@ func (r VirtualAppConfiguration) GetGuacdConfiguration() guacd.Configuration {
 		conf.SetParameter(guacd.VNCPassword, password)
 		conf.SetParameter(guacd.VNCAutoretry, "10")
 	}
-	// 设置存储
+	// set storage
 	//replayCfg := r.TerminalConfig.ReplayStorage
 	//if replayCfg.TypeName != "null" {
 	//	recordDirPath := filepath.Join(config.GlobalConfig.RecordPath, r.Created.Format(recordDirTimeFormat))
@@ -289,14 +289,14 @@ func (r VirtualAppConfiguration) GetGuacdConfiguration() guacd.Configuration {
 		}
 	}
 
-	// 粘贴复制
+	// copy/paste
 	{
 		disableCopy := ConvertBoolToString(!r.ActionsPerm.EnableCopy)
 		disablePaste := ConvertBoolToString(!r.ActionsPerm.EnablePaste)
 		conf.SetParameter(guacd.DisableCopy, disableCopy)
 		conf.SetParameter(guacd.DisablePaste, disablePaste)
 	}
-	// vnc 强制使用 utf8 编码
+	// vnc forces the use of utf8 encoding
 	conf.SetParameter(guacd.VNCClipboardEncoding, "UTF-8")
 
 	if sftpPort > 0 {

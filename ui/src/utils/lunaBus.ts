@@ -6,10 +6,10 @@ import type { LunaMessage, LunaMessageEvents } from '@/types/postmessage.type';
 
 import { LUNA_MESSAGE_TYPE } from '@/types/postmessage.type';
 
-// 获取所有事件类型
+// Get all event types
 export type LunaEventType = keyof LunaMessageEvents;
 
-// 创建事件-数据映射类型
+// Create event-to-data mapping type
 type EventPayloadMap = {
   [K in LunaEventType]: LunaMessageEvents[K]['data'] extends undefined
     ? void
@@ -43,7 +43,7 @@ class LunaCommunicator<T extends EventPayloadMap = EventPayloadMap> {
           );
           break;
         default:
-          // 处理其他类型的消息
+          // Handle other message types
           if (allEventTypes.includes(message.name as LunaEventType)) {
             const eventType = message.name as keyof T;
             const data = message as T[keyof T];
@@ -55,7 +55,7 @@ class LunaCommunicator<T extends EventPayloadMap = EventPayloadMap> {
     });
   }
 
-  // 发送消息到目标窗口
+  // Send message to the target window
   public sendLuna<K extends keyof T>(name: K, data: T[K]) {
     if (!this.lunaId || !this.targetOrigin) {
       console.warn('Target window not set');
@@ -64,17 +64,17 @@ class LunaCommunicator<T extends EventPayloadMap = EventPayloadMap> {
     window.parent.postMessage({ name, id: this.lunaId, data }, this.targetOrigin);
   }
 
-  // 监听事件
+  // Listen for events
   public onLuna<K extends keyof T>(type: K, handler: (data: T[K]) => void) {
     this.mitt.on(type, handler);
   }
 
-  // 移除监听器
+  // Remove a listener
   public offLuna<K extends keyof T>(type: K, handler?: (data: T[K]) => void) {
     this.mitt.off(type, handler);
   }
 
-  // 监听一次性事件
+  // Listen for a one-time event
   public once<K extends keyof T>(type: K, handler: (data: T[K]) => void) {
     const onceHandler = (data: T[K]) => {
       handler(data);
@@ -83,12 +83,12 @@ class LunaCommunicator<T extends EventPayloadMap = EventPayloadMap> {
     this.onLuna(type, onceHandler);
   }
 
-  // 销毁实例
+  // Destroy the instance
   public destroy() {
     this.mitt.all.clear();
   }
 
-  // 获取所有事件类型
+  // Get all event types
   public getEventTypes(): Array<keyof T> {
     return Object.keys(this.mitt.all) as Array<keyof T>;
   }

@@ -26,7 +26,7 @@ const testImages: any = {
    * Test WebP image, encoded as base64.
    */
   'image/webp': 'UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==',
-}; // 测试单个图片格式
+}; // Test individual image format
 async function testImageFormat(mimeType: string, base64Data: any): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
     const image = new Image();
@@ -75,10 +75,10 @@ Object.entries(testImages).forEach(([mimeType, base64Data]) => {
 });
 
 export async function getSupportedImages(): Promise<string[]> {
-  // 清空之前的结果
+  // Clear previous results
   supportImages.length = 0;
 
-  // 并行测试所有图片格式
+  // Test all image formats in parallel
   const testPromises = Object.entries(testImages).map(async ([mimeType, base64Data]) => {
     const isSupported = await testImageFormat(mimeType, base64Data);
     if (isSupported) {
@@ -87,10 +87,10 @@ export async function getSupportedImages(): Promise<string[]> {
     return { mimeType, isSupported };
   });
 
-  // 等待所有测试完成
+  // Wait for all tests to complete
   await Promise.all(testPromises);
 
-  return [...supportImages]; // 返回副本
+  return [...supportImages]; // Return a copy
 }
 export async function getSupportedGuacVideos(): Promise<string[]> {
   return Guacamole.VideoPlayer.getSupportedTypes();

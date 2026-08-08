@@ -49,13 +49,13 @@ func (p *Parser) initial() {
 	p.cmdRecordChan = make(chan *ExecutedCommand, 1024)
 }
 
-// ParseStream 解析数据流
+// ParseStream parses the data stream
 func (p *Parser) ParseStream(userInChan chan *Message) {
 	logger.Infof("Session %s: Parser start", p.id)
 	go func() {
 		defer func() {
 			p.ParseUserInput(charEnter)
-			// 会话结束，结算命令结果
+			// session ended, finalize the command result
 			p.sendCommandRecord()
 			close(p.cmdRecordChan)
 			logger.Infof("Session %s: Parser routine done", p.id)
@@ -70,7 +70,7 @@ func (p *Parser) ParseStream(userInChan chan *Message) {
 				return
 			case now := <-cmdRecordTicker.C:
 				if now.Sub(lastActiveTime) > maxTimeout {
-					p.ParseUserInput(charEnter) //手动结算一次命令
+					p.ParseUserInput(charEnter) // manually finalize a command
 				}
 				continue
 			case msg, ok := <-userInChan:
@@ -94,7 +94,7 @@ func (p *Parser) ParseStream(userInChan chan *Message) {
 					default:
 						continue
 					}
-					p.ParseUserInput(charEnter) //手动结算一次命令
+					p.ParseUserInput(charEnter) // manually finalize a command
 					cmd = fmt.Sprintf("Mouse Position[%s,%s] %s\r", s[0], s[1], cmd)
 					b = append(b, []byte(cmd)...)
 				case guacd.InstructionKey:
@@ -104,7 +104,7 @@ func (p *Parser) ParseStream(userInChan chan *Message) {
 						if err == nil {
 							cb := []byte(guacd.KeysymToCharacter(keyCode))
 							if len(cb) == 0 {
-								// guacamole-common.js unicode计算方法
+								// guacamole-common.js unicode calculation method
 								// if (codepoint >= 0x0100 && codepoint <= 0x10FFFF)
 								//      return 0x01000000 | codepoint;
 								if keyCode > 0x01000000 {
@@ -117,7 +117,7 @@ func (p *Parser) ParseStream(userInChan chan *Message) {
 									}
 									b = append(b, []byte(to)...)
 								} else {
-									// 未知的键值,转成 rune 字符
+									// unknown key value, convert to rune character
 									b = append(b, []byte(string(rune(keyCode)))...)
 								}
 							} else {
@@ -140,23 +140,23 @@ func (p *Parser) ParseStream(userInChan chan *Message) {
 	}()
 }
 
-// ParseUserInput 解析用户的输入
+// ParseUserInput parses the user's input
 func (p *Parser) ParseUserInput(b []byte) {
 	_ = p.parseInputState(b)
 }
 
-// parseInputState 切换用户输入状态, 并结算命令和结果
+// parseInputState toggles the user input state, and finalizes commands and their results
 func (p *Parser) parseInputState(b []byte) []byte {
 	p.inputPreState = p.inputState
 	if bytes.LastIndex(b, charEnter) >= 0 {
-		// 连续输入enter key, 结算上一条可能存在的命令结果
+		// consecutive enter key input, finalize the result of the previous command if any
 		p.sendCommandRecord()
 		p.inputState = false
-		// 用户输入了Enter，开始结算命令
+		// user pressed Enter, start finalizing the command
 		p.parseCmdInput()
 	} else {
 		p.inputState = true
-		// 用户又开始输入，并上次不处于输入状态，开始结算上次命令的结果
+		// user started typing again, and was not in input state previously, start finalizing the previous command's result
 		if !p.inputPreState {
 			p.sendCommandRecord()
 		}
@@ -164,7 +164,7 @@ func (p *Parser) parseInputState(b []byte) []byte {
 	return b
 }
 
-// parseCmdInput 解析命令的输入
+// parseCmdInput parses the command input
 func (p *Parser) parseCmdInput() {
 	command := p.Parse()
 	if len(command) <= 0 {
@@ -194,7 +194,7 @@ func (p *Parser) Parse() string {
 	return line
 }
 
-// Close 关闭parser
+// Close closes the parser
 func (p *Parser) Close() {
 	select {
 	case <-p.closed:

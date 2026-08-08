@@ -32,7 +32,7 @@ const testImages: any = {
    * Test WebP image, encoded as base64.
    */
   'image/webp': 'UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==',
-}; // 测试单个图片格式
+}; // Test individual image format
 async function testImageFormat(mimeType: string, base64Data: any): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
     const image = new Image();
@@ -99,10 +99,10 @@ const BYTES_PER_MEGABYTE = 1024 * 1024;
 const getTextLength = (text: string) => Array.from(text).length;
 
 export async function getSupportedImages(): Promise<string[]> {
-  // 清空之前的结果
+  // Clear previous results
   supportImages.length = 0;
 
-  // 并行测试所有图片格式
+  // Test all image formats in parallel
   const testPromises = Object.entries(testImages).map(async ([mimeType, base64Data]) => {
     const isSupported = await testImageFormat(mimeType, base64Data);
     if (isSupported) {
@@ -111,10 +111,10 @@ export async function getSupportedImages(): Promise<string[]> {
     return { mimeType, isSupported };
   });
 
-  // 等待所有测试完成
+  // Wait for all tests to complete
   await Promise.all(testPromises);
 
-  return [...supportImages]; // 返回副本
+  return [...supportImages]; // Return a copy
 }
 export async function getSupportedGuacVideos(): Promise<string[]> {
   return Guacamole.VideoPlayer.getSupportedTypes();
@@ -513,7 +513,7 @@ export function useGuacamoleClient(t: any) {
       writer.sendBlob(data.data);
     }
   };
-  // 禁用 组合键
+  // Disable key combinations
   const commandKeySym = 65511;
   const controlKeySym = 65507;
   const BLOCKED_KEY_COMBINATIONS = [
@@ -524,12 +524,12 @@ export function useGuacamoleClient(t: any) {
     [65511, 108], // command + l
     [65511, 120], // command + x
     [65511, 65505, 112], // command + shift + p
-    [65511, 65505, 80], // command + shift + p 中文输入下
+    [65511, 65505, 80], // command + shift + p under Chinese IME input
     [65507, 65511, 109], // control + command + m
     [65507, 65511, 65505, 109], // control + command + shift + m
-    [65511, 80], // command + shift + p 中文输入下
+    [65511, 80], // command + shift + p under Chinese IME input
   ];
-  // 禁用 组合键 control + n
+  // Disable key combination control + n
   const HttpBlockedKeys = [
     [65507, 104], // control + h
     [65507, 106], // control + j
@@ -695,7 +695,7 @@ export function useGuacamoleClient(t: any) {
     console.log('Guacamole error message:', msg);
     switch (code) {
       case 1005:
-        // 管理员终断会话，特殊处理
+        // Session terminated by administrator, special handling
         if (currentLang === 'cn') {
           msg = status.message + ' ' + msg;
         } else {
@@ -779,8 +779,8 @@ export function useGuacamoleClient(t: any) {
     }
     recorder.onclose = () => {
       console.log('Audio stream closed');
-      requestAudioStream(client); // 重新请求音频流
-    }; // 重新请求音频流
+      requestAudioStream(client); // Re-request the audio stream
+    }; // Re-request the audio stream
   };
   const currentFolderFiles = ref<any>([]);
   const current_files = ref<any>({});
@@ -955,7 +955,7 @@ export function useGuacamoleClient(t: any) {
   };
 
   const uploadFile = async (options: UploadCustomRequestOptions, folder: GuacamoleFile) => {
-    // 参数验证
+    // Parameter validation
     if (!options || !options.file) {
       const error = new Error('Upload options or file is missing');
       console.error('Upload failed:', error.message);
@@ -970,7 +970,7 @@ export function useGuacamoleClient(t: any) {
       throw error;
     }
 
-    // Guacamole 客户端验证
+    // Guacamole client validation
     if (!guaClient.value) {
       const error = new Error('Guacamole client is not initialized');
       console.error('Upload failed:', error.message);
@@ -978,7 +978,7 @@ export function useGuacamoleClient(t: any) {
       throw error;
     }
 
-    // 文件系统对象验证
+    // File system object validation
     if (!currentGuacFsObject.value) {
       const error = new Error('Guacamole file system object is not available');
       console.error('Upload failed:', error.message);
@@ -989,7 +989,7 @@ export function useGuacamoleClient(t: any) {
     const file = options.file;
     const { onFinish, onError } = options;
 
-    // 文件名验证
+    // File name validation
     if (!file.name || file.name.trim() === '') {
       const error = new Error('File name is empty or invalid');
       console.error('Upload failed:', error.message);
@@ -1028,9 +1028,9 @@ export function useGuacamoleClient(t: any) {
     } catch (error) {
       console.error('Error uploading file:', error);
       onError();
-      throw error; // 重新抛出异常，让调用者知道上传失败
+      throw error; // Rethrow the exception so the caller knows the upload failed
     } finally {
-      // 确保无论成功还是失败都清理 interval
+      // Ensure the interval is cleaned up whether it succeeds or fails
       if (fakeProcessInterval.value) {
         clearInterval(fakeProcessInterval.value);
         fakeProcessInterval.value = null;

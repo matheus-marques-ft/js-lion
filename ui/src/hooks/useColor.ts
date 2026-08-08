@@ -28,9 +28,9 @@ export const useColor = () => {
   };
 
   /**
-   * 将十六进制颜色转换为HSL颜色
-   * @param hex 十六进制颜色
-   * @returns HSL颜色
+   * Convert a hex color to an HSL color
+   * @param hex Hex color
+   * @returns HSL color
    */
   const hexToHSL = (hex: string): HSL => {
     let hexValue = hex.replace(/^#/, '');
@@ -42,12 +42,12 @@ export const useColor = () => {
         .join('');
     }
 
-    // 解析RGB值
+    // Parse RGB values
     const r = Number.parseInt(hexValue.substring(0, 2), 16) / 255;
     const g = Number.parseInt(hexValue.substring(2, 4), 16) / 255;
     const b = Number.parseInt(hexValue.substring(4, 6), 16) / 255;
 
-    // 计算HSL值
+    // Compute HSL values
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
     let h = 0;
@@ -73,7 +73,7 @@ export const useColor = () => {
       h /= 6;
     }
 
-    // 转换为标准HSL格式
+    // Convert to standard HSL format
     return {
       h: Math.round(h * 360),
       s: Math.round(s * 100),
@@ -82,11 +82,11 @@ export const useColor = () => {
   };
 
   /**
-   * 将HSL颜色转换为十六进制颜色
-   * @param h 色相
-   * @param s 饱和度
-   * @param l 亮度
-   * @returns 十六进制颜色
+   * Convert an HSL color to a hex color
+   * @param h Hue
+   * @param s Saturation
+   * @param l Lightness
+   * @returns Hex color
    */
   const hslToHex = (h: number, s: number, l: number) => {
     h /= 360;
@@ -96,7 +96,7 @@ export const useColor = () => {
     let r, g, b;
 
     if (s === 0) {
-      // 如果饱和度为0，则为灰色
+      // If saturation is 0, it's a shade of gray
       r = g = b = l;
     } else {
       const hue2rgb = (p: number, q: number, t: number): number => {
@@ -116,7 +116,7 @@ export const useColor = () => {
       b = hue2rgb(p, q, h - 1 / 3);
     }
 
-    // 转换为十六进制
+    // Convert to hex
     const toHex = (x: number): string => {
       const hex = Math.round(x * 255).toString(16);
       return hex.length === 1 ? `0${hex}` : hex;
@@ -126,18 +126,18 @@ export const useColor = () => {
   };
 
   /**
-   * 将颜色转换为rgba格式
-   * @param alphaValue 透明度值
-   * @param color 颜色
-   * @returns rgba格式颜色
+   * Convert a color to rgba format
+   * @param alphaValue Alpha value
+   * @param color Color
+   * @returns Color in rgba format
    */
   const alpha = (alphaValue: number, color?: string) => {
-    // 如果没有提供颜色，使用当前主题颜色
+    // If no color is provided, use the current theme color
     const actualColor = color || currentMainColoc.value;
-    // 确保透明度值在0-1之间
+    // Ensure the alpha value is between 0 and 1
     const alpha = Math.max(0, Math.min(1, alphaValue));
 
-    // 移除#号并处理缩写形式
+    // Remove the # sign and handle shorthand form
     let hex = actualColor.replace(/^#/, '');
 
     if (hex.length === 3) {
@@ -147,17 +147,17 @@ export const useColor = () => {
         .join('');
     }
 
-    // 解析RGB值
+    // Parse RGB values
     const r = Number.parseInt(hex.substring(0, 2), 16);
     const g = Number.parseInt(hex.substring(2, 4), 16);
     const b = Number.parseInt(hex.substring(4, 6), 16);
 
-    // 返回rgba格式
+    // Return rgba format
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
   /**
-   * 将颜色变亮
+   * Lighten a color
    * @param amount
    * @param color
    * @param alphaValue
@@ -176,7 +176,7 @@ export const useColor = () => {
   };
 
   /**
-   * 将颜色变暗
+   * Darken a color
    * @param amount
    * @param color
    * @param alphaValue
@@ -187,7 +187,7 @@ export const useColor = () => {
     const hsl = hexToHSL(actualColor);
     const hexColor = hslToHex(hsl.h, hsl.s, Math.max(0, hsl.l - amount));
 
-    // 如果提供了透明度参数，应用透明度
+    // If an alpha value is provided, apply it
     if (alphaValue !== undefined) {
       return alpha(alphaValue, hexColor);
     }

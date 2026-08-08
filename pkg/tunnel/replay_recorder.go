@@ -85,7 +85,7 @@ func (r *ReplayRecorder) WriteSessionMeta(t common.UTCTime) {
 }
 
 func (r *ReplayRecorder) IsConnectFailed() bool {
-	// 检测录像文件是否存在，且大小大于 5KB 只检测第一个录像文件大小
+	// check whether the replay file exists and is larger than 5KB; only checks the size of the first replay file
 	minSize := int64(1024) * 5
 	partFilename := r.GetPartFilenameByIndex(0)
 	partFilePath := filepath.Join(r.RootPath, partFilename)
@@ -106,7 +106,7 @@ func (r *ReplayRecorder) IsConnectFailed() bool {
 }
 
 func (r *ReplayRecorder) CleanFailedPartFileReplay() {
-	// 删除后续异常的文件
+	// remove any subsequent abnormal files
 	minSize := int64(1024) * 5
 	for i := 0; i < r.currentIndex; i++ {
 		partFilename := r.GetPartFilenameByIndex(i)
@@ -140,7 +140,7 @@ func (r *ReplayRecorder) Stop() {
 		Info:      r.info,
 	}
 
-	// 检测会话文件大小是否满足录像要求，否则判断连接失败，不上传录像文件。
+	// check whether the session file size meets the replay requirement; otherwise treat the connection as failed and skip uploading the replay files.
 	if r.IsConnectFailed() {
 		logger.Warnf("ReplayRecorder %s connect failed, not upload replay parts", r.SessionId)
 		if err := os.RemoveAll(r.RootPath); err != nil {

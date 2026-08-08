@@ -16,4 +16,4 @@ services:
       - guacd
     restart: always
     volumes:
-      - ./data/:/opt/lion/data/:rw # /opt/lion/-> 本地项目路径, 修改 ./data 目录权限为777
+      - ./data/:/opt/lion/data/:rw # /opt/lion/-> local project path, change the ./data directory permissions to 777
