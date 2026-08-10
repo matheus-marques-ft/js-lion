@@ -41,7 +41,7 @@ jobs:
         push: true
         file: Dockerfile
         tags: ghcr.io/${{ env.OWNER }}/${{ matrix.component }}:${{ matrix.version }}-ce
-        platforms: linux/amd64
+        platforms: linux/arm64
         build-args: |
           VERSION=${{ matrix.version }}
           GOPROXY=direct
