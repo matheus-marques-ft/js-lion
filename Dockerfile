@@ -1,4 +1,4 @@
-FROM ghcr.io/matheus-marques-ft/lion-base:20260810_173314 AS stage-build
+FROM ghcr.io/matheus-marques-ft/lion-base:20260810_184516 AS stage-build
 ARG TARGETARCH
 
 ARG GOPROXY=https://goproxy.io
