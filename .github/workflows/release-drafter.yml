@@ -66,6 +66,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           draft: false
+          prerelease: ${{ !endsWith(steps.get_version.outputs.TAG, '-stable') }}
           files: |
             build/*.gz
         env:
