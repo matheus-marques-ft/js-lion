@@ -61,16 +61,15 @@ jobs:
         env:
           VERSION: ${{ steps.get_version.outputs.TAG }}
 
-      - name: Remove stale duplicate draft release
+      - name: Clean up any existing release for this tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.get_version.outputs.TAG }}"
-          KEEP_ID="${{ steps.create_release.outputs.id }}"
           gh api "repos/${{ github.repository }}/releases?per_page=100" --jq \
-            ".[] | select(.tag_name == \"${TAG}\" and .draft == true and (.id | tostring) != \"${KEEP_ID}\") | .id" \
+            ".[] | select(.tag_name == \"${TAG}\") | .id" \
           | while read -r id; do
-              gh api -X DELETE "repos/${{ github.repository }}/releases/${id}" && echo "Deleted stale draft release ${id}"
+              gh api -X DELETE "repos/${{ github.repository }}/releases/${id}" && echo "Deleted existing release ${id} for ${TAG}"
             done
 
       - name: Release Upload Assets
@@ -79,6 +78,8 @@ jobs:
         with:
           draft: false
           prerelease: ${{ !endsWith(steps.get_version.outputs.TAG, '-stable') }}
+          name: ${{ steps.get_version.outputs.TAG }}
+          body: ${{ steps.create_release.outputs.body }}
           files: |
             build/*.gz
         env:
