@@ -25,7 +25,7 @@ export const createThemeOverrides = (
   return {
     common: {
       fontSize: '13px',
-      fontFamily: 'Open Sans',
+      fontFamily: 'Instrument Sans',
     },
     Tabs: {
       tabPaddingVerticalSmallLine: '6px 12px 6px 0',
