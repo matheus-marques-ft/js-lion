@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         go_version: [ 'stable' ]
-        node_version: [ '20' ]
+        node_version: [ '22' ]
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
